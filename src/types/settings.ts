@@ -2,6 +2,34 @@ export type TextAlign = 'left' | 'center' | 'right' | 'justify';
 export type ReadingMode = 'paginated' | 'scroll';
 export type ThemeName = 'light' | 'sepia' | 'dark' | 'ultraDark';
 
+// Layout & Typography
+export type ColumnCount = 1 | 2 | 3;
+export type FontWeight = 'light' | 'regular' | 'medium' | 'semibold' | 'bold';
+
+export const FONT_WEIGHT_MAP: Record<FontWeight, number> = {
+  light: 300,
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+};
+
+// Page Navigation
+export type PageTransition = 'slide' | 'fade' | 'none';
+
+// Appearance
+export type AppearanceMode = 'light' | 'dark' | 'auto';
+
+export interface ThemeMapping {
+  lightTheme: ThemeName;
+  darkTheme: ThemeName;
+}
+
+export const DEFAULT_THEME_MAPPING: ThemeMapping = {
+  lightTheme: 'light',
+  darkTheme: 'dark',
+};
+
 export interface ThemeColors {
   background: string;
   text: string;
@@ -22,6 +50,15 @@ export interface ReaderSettings {
   theme: ThemeName;
   readingMode: ReadingMode;
   margin: number;
+  // Layout & Typography
+  columnCount: ColumnCount;
+  textIndent: number;
+  fontWeight: FontWeight;
+  // Page Navigation
+  pageTransition: PageTransition;
+  transitionDuration: number;
+  swipeEnabled: boolean;
+  autoPageInterval: number | null;
 }
 
 export const DEFAULT_SETTINGS: ReaderSettings = {
@@ -36,6 +73,15 @@ export const DEFAULT_SETTINGS: ReaderSettings = {
   theme: 'light',
   readingMode: 'paginated',
   margin: 20,
+  // Layout & Typography
+  columnCount: 1,
+  textIndent: 0,
+  fontWeight: 'regular',
+  // Page Navigation
+  pageTransition: 'slide',
+  transitionDuration: 300,
+  swipeEnabled: true,
+  autoPageInterval: null,
 };
 
 export const THEMES: Record<ThemeName, ThemeColors> = {
@@ -79,4 +125,6 @@ export const FONT_FAMILIES = [
   { name: 'System', css: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
   { name: 'PingFang SC', css: '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif' },
   { name: 'Songti SC', css: '"Songti SC", "SimSun", serif' },
+  { name: 'System Serif', css: 'ui-serif, Georgia, serif' },
+  { name: 'Kaiti SC', css: '"Kaiti SC", "STKaiti", serif' },
 ] as const;

@@ -1,5 +1,5 @@
 import type { ReaderSettings } from '../types';
-import { THEMES } from '../types';
+import { THEMES, FONT_WEIGHT_MAP } from '../types';
 
 /**
  * Generates a complete CSS stylesheet from the current reader settings.
@@ -33,13 +33,14 @@ body, .reader-engine-content {
   letter-spacing: ${settings.letterSpacing}px;
   word-spacing: ${settings.wordSpacing}px;
   text-align: ${settings.textAlign};
+  font-weight: ${FONT_WEIGHT_MAP[settings.fontWeight]};
   hyphens: ${hyphens};
   -webkit-hyphens: ${hyphens};
   overflow-wrap: break-word;
 }
 
 p {
-  margin-bottom: ${settings.paragraphSpacing}px;
+  margin-bottom: ${settings.paragraphSpacing}px;${settings.textIndent > 0 ? `\n  text-indent: ${settings.textIndent}em;` : ''}
 }
 
 a {
@@ -112,8 +113,8 @@ figcaption {
     css += `
 
 .reader-engine-content {
-  column-width: calc(100% - ${settings.margin * 2}px);
-  column-gap: ${settings.margin * 2}px;
+  column-count: ${settings.columnCount};
+  column-gap: ${settings.columnCount === 1 ? 0 : settings.margin * 2}px;
   column-fill: auto;
   height: 100%;
   overflow: hidden;

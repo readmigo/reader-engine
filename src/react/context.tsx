@@ -1,11 +1,19 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { ReaderEngine, type ReaderEngineOptions, type ReaderState } from '../engine';
 import type { BookDetail, ChapterSummary, ReaderSettings } from '../types';
+import type { ReadingPosition } from '../core/position-manager';
+import type { AutoPagerState } from '../core/auto-pager';
+import type { SelectionChangeEvent, HighlightTapEvent } from '../interaction';
+import type { TTSState } from '../tts';
 
 export interface ReaderProviderProps extends ReaderEngineOptions {
   children: ReactNode;
   onError?: (error: Error) => void;
   onChapterChange?: (chapter: ChapterSummary, index: number) => void;
+  onSelectionChange?: (event: SelectionChangeEvent) => void;
+  onHighlightTap?: (event: HighlightTapEvent) => void;
+  onTTSStateChange?: (state: TTSState) => void;
+  onAutoPageTurn?: () => void;
 }
 
 export interface ReaderContextValue {
@@ -19,6 +27,13 @@ export interface ReaderContextValue {
   prevPage: () => boolean;
   goToChapter: (index: number) => Promise<void>;
   updateSettings: (partial: Partial<ReaderSettings>) => void;
+  savePosition: () => ReadingPosition | null;
+  restorePosition: (pos: ReadingPosition) => Promise<void>;
+  startAutoPage: (interval?: number) => void;
+  pauseAutoPage: () => void;
+  resumeAutoPage: () => void;
+  stopAutoPage: () => void;
+  autoPageState: AutoPagerState;
 }
 
 const ReaderContext = createContext<ReaderContextValue | null>(null);
@@ -27,6 +42,10 @@ export function ReaderProvider({
   children,
   onError,
   onChapterChange,
+  onSelectionChange,
+  onHighlightTap,
+  onTTSStateChange,
+  onAutoPageTurn,
   ...engineOptions
 }: ReaderProviderProps) {
   const engineRef = useRef<ReaderEngine | null>(null);
@@ -46,13 +65,21 @@ export function ReaderProvider({
     };
     engine.callbacks.onError = onError;
     engine.callbacks.onChapterChange = onChapterChange;
+    engine.callbacks.onSelectionChange = onSelectionChange;
+    engine.callbacks.onHighlightTap = onHighlightTap;
+    engine.callbacks.onTTSStateChange = onTTSStateChange;
+    engine.callbacks.onAutoPageTurn = onAutoPageTurn;
 
     return () => {
       engine.callbacks.onStateChange = undefined;
       engine.callbacks.onError = undefined;
       engine.callbacks.onChapterChange = undefined;
+      engine.callbacks.onSelectionChange = undefined;
+      engine.callbacks.onHighlightTap = undefined;
+      engine.callbacks.onTTSStateChange = undefined;
+      engine.callbacks.onAutoPageTurn = undefined;
     };
-  }, [engine, onError, onChapterChange]);
+  }, [engine, onError, onChapterChange, onSelectionChange, onHighlightTap, onTTSStateChange, onAutoPageTurn]);
 
   const loadBook = useCallback(async (bookId: string) => {
     const detail = await engine.loadBook(bookId);
@@ -81,6 +108,30 @@ export function ReaderProvider({
     engine.updateSettings(partial);
   }, [engine]);
 
+  const savePosition = useCallback(() => {
+    return engine.savePosition();
+  }, [engine]);
+
+  const restorePosition = useCallback(async (pos: ReadingPosition) => {
+    await engine.restorePosition(pos);
+  }, [engine]);
+
+  const startAutoPage = useCallback((interval?: number) => {
+    engine.startAutoPage(interval);
+  }, [engine]);
+
+  const pauseAutoPage = useCallback(() => {
+    engine.pauseAutoPage();
+  }, [engine]);
+
+  const resumeAutoPage = useCallback(() => {
+    engine.resumeAutoPage();
+  }, [engine]);
+
+  const stopAutoPage = useCallback(() => {
+    engine.stopAutoPage();
+  }, [engine]);
+
   const value: ReaderContextValue = {
     engine,
     state,
@@ -92,6 +143,13 @@ export function ReaderProvider({
     prevPage,
     goToChapter,
     updateSettings,
+    savePosition,
+    restorePosition,
+    startAutoPage,
+    pauseAutoPage,
+    resumeAutoPage,
+    stopAutoPage,
+    autoPageState: engine.autoPageState,
   };
 
   return <ReaderContext.Provider value={value}>{children}</ReaderContext.Provider>;
