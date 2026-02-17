@@ -6,8 +6,7 @@ export function useReader() {
 }
 
 export function useReaderSettings() {
-  const { state, updateSettings } = useReaderContext();
-  const { engine } = useReaderContext();
+  const { engine, updateSettings } = useReaderContext();
   return { settings: engine.settings, updateSettings };
 }
 
@@ -17,6 +16,6 @@ export function useChapters() {
     chapters,
     currentIndex: state.chapterIndex,
     totalChapters: chapters.length,
-    bookTitle: bookDetail?.title ?? null,
+    bookTitle: bookDetail?.title ?? '',
   };
 }
