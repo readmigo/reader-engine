@@ -110,11 +110,13 @@ figcaption {
 }`;
 
   if (settings.readingMode === 'paginated') {
+    const gap = settings.columnCount === 1 ? 0 : settings.margin * 2;
     css += `
 
 .reader-engine-content {
+  column-width: calc((100% - ${(settings.columnCount - 1) * gap}px) / ${settings.columnCount});
   column-count: ${settings.columnCount};
-  column-gap: ${settings.columnCount === 1 ? 0 : settings.margin * 2}px;
+  column-gap: ${gap}px;
   column-fill: auto;
   height: 100%;
   overflow: hidden;
